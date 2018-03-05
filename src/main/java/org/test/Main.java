@@ -2,58 +2,50 @@ package org.test;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import servlet.HelloServlet;
+import servlet.getdata.getdata;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.FileWriter;
+import java.net.URL;
 
 public class Main
 {
-    public static void main( String[] args ) throws Exception
+    public static void main(String[] args) throws Exception
     {
-        // Create a basic jetty server object that will listen on port 8080.
-        // Note that if you set this to port 0 then a randomly available port
-        // will be assigned that you can either look in the logs for the port,
-        // or programmatically obtain it for use in test cases.
+        /*
+        取得資料
+         */
+
+        //建立取得資料物件
+        getdata getdata = new getdata();
+        //初始化資料來源
+        getdata.setUrl(new URL("http://www.twse.com.tw/exchangeReport/STOCK_DAY?response=html&date=20180201&stockNo=2330"));
+        //初始化資料存取路徑
+        getdata.setFileWriter(new FileWriter("/Users/USER/Desktop/data.txt",false));
+        //下載資料
+        getdata.download();
+
+
+
+        /*
+        建立伺服器
+        */
+
         Server server = new Server(8080);
 
-        // The ServletHandler is a dead simple way to create a context handler
-        // that is backed by an instance of a Servlet.
-        // This handler then needs to be registered with the Server object.
+        //建立Server內可調用的handler
+        //並將handler裝進server內
         ServletHandler handler = new ServletHandler();
         server.setHandler(handler);
 
-        // Passing in the class for the Servlet allows jetty to instantiate an
-        // instance of that Servlet and mount it on a given context path.
-
-        // IMPORTANT:
-        // This is a raw Servlet, not a Servlet that has been configured
-        // through a web.xml @WebServlet annotation, or anything similar.
+        //將Servlet裝進Handler內
         handler.addServletWithMapping(HelloServlet.class, "/*");
 
-        // Start things up!
+        //啟動伺服器
         server.start();
-
-        // The use of server.join() the will make the current thread join and
-        // wait until the server is done executing.
-        // See
-        // http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join()
+        //
         server.join();
-    }
 
-    @SuppressWarnings("serial")
-    public static class HelloServlet extends HttpServlet
-    {
-        @Override
-        protected void doGet( HttpServletRequest request,
-                              HttpServletResponse response ) throws ServletException,
-                IOException
-        {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello from HelloServlet</h1>");
-        }
+
     }
 }
