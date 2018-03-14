@@ -2,161 +2,150 @@ package servlet.getdata;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 
 public class getdata
 {
-    private URL url;
-
+    private URL stockurl,futuresurl;
     private Connection conn;
     private Statement statement;
 
-
-    private FileWriter fileWriter;
-
-
-
-    public void setUrl(URL url)
+    public void setStockUrl(URL url)    //存入股票資料連結
     {
-        this.url = url;
-        System.out.println("存入資料連結");
+        stockurl = url;
     }
-    public void setFileWriter(FileWriter fileWriter)
+    public void setFuturesurl(URL url)
     {
-        this.fileWriter = fileWriter;
-        System.out.println("設定檔案位置");
+        futuresurl = url;
+        System.out.println("存入期貨資料連結");
     }
-    public Connection connectMySQL()
+    public void connectMySQL()  //連接MySQLToJava
     {
         try
         {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/stock-history", "root", "12345");
-            System.out.println("連接成功MySQLToJava");
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        return conn;
     }
-
-
-    /*
-        public getdata() throws SQLException, IOException {
-        conn = connectMySQL();
-
-        ResultSet resultSet = null;
-        try {
-            statement = conn.createStatement();
-            resultSet = statement.executeQuery("SELECT name FROM world.country");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        while (resultSet.next())
-        {
-            String name = resultSet.getString("name");
-            System.out.println(name);
-        }
-
-        resultSet.close();
-        statement.close();
-        conn.close();
-
-    }
-
-     */
-
-    public void download() throws IOException, SQLException
+    public void inputstock() throws IOException, SQLException   ////存入股市資料
     {
-        Document data = Jsoup.parse(url, 5000);
-        ResultSet resultSet = null;
-
-        //建立表格
-        /*
-
+        Document data = Jsoup.parse(stockurl, 5000);
 
         try
         {
+            //建立表格
+            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/stock-history", "root", "12345");
             statement = conn.createStatement();
             statement.executeUpdate
                     (
                     "CREATE TABLE if not exists Stock_2330" +
-                            "(Date date," +
-                            "Trading_shares int," +
-                            "Turnover double," +
-                            "Opening_price double," +
-                            "Highest_price double," +
-                            "Lowest_price double," +
-                            "Closing_price double," +
-                            "Gross_Spread double," +
-                            "Number_of_transactions int);"
+                            "(Date CHAR(20) not null," +
+                            "Trading_shares TEXT," +
+                            "Turnover TEXT," +
+                            "Opening_price TEXT," +
+                            "Highest_price TEXT," +
+                            "Lowest_price TEXT," +
+                            "Closing_price TEXT," +
+                            "Gross_Spread TEXT," +
+                            "Number_of_transactions TEXT," +
+                            "primary key(Date));"
                     );
-            System.out.println("表格建立成功");
+
+            //存入資料
+            Elements trs = data.select("tr");
+            for(int i=2;i<trs.size();i++)
+            {
+                Elements tds = trs.get(i).select("td");
+                String[] TD = new String[tds.size()];
+
+
+                for(int j=0;j<tds.size();j++)
+                {
+                    String Td = tds.get(j).text();
+                    TD[j] = Td;
+                }
+
+                statement.executeUpdate
+                        ("insert ignore into Stock_2330 values" +
+                                "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                +TD[5]+"','" +TD[6]+"','" +TD[7]+"','" +TD[8]+"')");
+            }
+
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-          */
-
-
-        Elements trs = data.select("tr");
-        int i = 1;
-        for (Element tr : trs)
-        {
-            Elements tds = tr.select("td");
-
-            for (Element td : tds)
-            {
-                String Td = td.text();
-                System.out.println(Td + "\t");
-                fileWriter.write(Td + "\t");
-            }
-
-            System.out.println("\n");
-            fileWriter.write("\n");
-            i++;
-        }
-
-        fileWriter.flush();
-        fileWriter.close();
 
         statement.close();
         conn.close();
-
-
-
-        /*
-        while (resultSet.next())
-        {
-            String name = resultSet.getString("name");
-            System.out.println(name);
-        }
-
-        resultSet.close();
-        statement.close();
-        conn.close();
-
-
-
-
-
-
-
-
-
-        */
-
     }
 
+
+    /*
+
+
+    public void inputfutures() throws IOException, SQLException
+    {
+        Document data = Jsoup.parse(futuresurl, 5000);
+
+        //建立表格
+        try
+        {
+            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/futures-history", "root", "12345");
+            statement = conn.createStatement();
+            statement.executeUpdate
+                    (
+                            "CREATE TABLE if not exists Futures_MTX" +
+                                    "(Date CHAR(20) not null," +
+                                    "Trading_shares TEXT," +
+                                    "Turnover TEXT," +
+                                    "Opening_price TEXT," +
+                                    "Highest_price TEXT," +
+                                    "Lowest_price TEXT," +
+                                    "Closing_price TEXT," +
+                                    "Gross_Spread TEXT," +
+                                    "Number_of_transactions TEXT," +
+                                    "primary key(Date));"
+                    );
+            System.out.println("表格建立成功");
+
+            Elements trs = data.select("tr");
+            for(int i=2;i<trs.size();i++)
+            {
+                Elements tds = trs.get(i).select("td");
+                String[] TD = new String[tds.size()];
+
+
+                for(int j=0;j<tds.size();j++)
+                {
+                    String Td = tds.get(j).text();
+                    TD[j] = Td;
+                }
+
+                statement.executeUpdate
+                        ("insert ignore into Stock_2330 values" +
+                                "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                +TD[5]+"','" +TD[6]+"','" +TD[7]+"','" +TD[8]+"')");
+            }
+            System.out.println("資料存入成功");
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        statement.close();
+        conn.close();
+    }
+    */
 
 
 }

@@ -10,6 +10,8 @@ import java.net.URL;
 
 public class Main
 {
+    static String day;
+
     public static void main(String[] args) throws Exception
     {
         /*
@@ -18,14 +20,33 @@ public class Main
 
         //建立取得資料物件
         getdata getdata = new getdata();
-        //初始化資料來源
-        getdata.setUrl(new URL("http://www.twse.com.tw/exchangeReport/STOCK_DAY?response=html&date=20180201&stockNo=2330"));
-        //初始化資料存取路徑
-        getdata.setFileWriter(new FileWriter("/Users/USER/Desktop/data.txt",false));
         //連到MySQL
         getdata.connectMySQL();
-        //下載資料
-        getdata.download();
+
+        for(int i=2018;i<=2018;i++)
+        {
+            for(int j=1;j<=12;j++)
+            {
+                //初始化資料來源
+                //目前設定股市資料來源為台灣證券交易所，預設台積電
+                String year = String.valueOf(i);
+                String month = String.format("%02d",j);
+                String URL = "http://www.twse.com.tw/exchangeReport/STOCK_DAY?response=html&date="+year+month+"01&stockNo=2330";
+
+                getdata.setStockUrl(new URL(URL));
+
+                //存入資料
+                getdata.inputstock();
+                System.out.println("存入"+year+month+"月資料");
+            }
+        }
+
+
+
+        //目前設定股市資料來源為鉅亨網，預設小台指
+        //getdata.setFuturesurl(new URL("http://www.cnyes.com/futures/History.aspx?mydate=20180314&code=MTX1"));
+
+
 
         /*
         建立伺服器
