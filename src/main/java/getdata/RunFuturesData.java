@@ -7,31 +7,30 @@ import org.jsoup.select.Elements;
 
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 
-public class runfutureshistorydata extends Thread
+public class RunFuturesData extends Thread
 {
-    private Calendar startDate;
-    private String Futureslink1,Futureslink2;
+    private Calendar StartDate;
+    private String Futureslink;
+    private Connection conn;
 
-    public void setStartDate(Calendar startDate) { this.startDate = startDate; }
-
+    public void setStartDate(Calendar StartDate) { this.StartDate = StartDate; }
     /*
     設定期貨資料源
-     */
-    public void setFutureslink1(String futureslink) { this.Futureslink1 = futureslink; }
-    public void setFutureslink2(String futureslink) { this.Futureslink2 = futureslink; }
+    */
+    public void setFutureslink(String futureslink) { this.Futureslink = futureslink; }
+    /*
+    設定MySQL資料庫
+    */
+    public void setMySQL(Connection conn) { this.conn = conn; }
 
     @Override
     public void run()
     {
-        String URL1 = Futureslink1.replace("********","20180314");
-        System.out.println(URL1);
-
         super.run();
         /*
         取得現在時間
@@ -42,14 +41,22 @@ public class runfutureshistorydata extends Thread
 
         try
         {
-            String Start = SDF.format(startDate.getTime());
-            String Now = SDF.format(NowDate.getTime());
+            String Start = SDF.format(StartDate.getTime());
 
-            Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/futures-history", "root", "12345");
+            NowDate.add(Calendar.DATE,1);
+            String NextDay = String.valueOf
+                    (
+                            NowDate.get(Calendar.YEAR)
+                                    + "-" + String.format("%02d",NowDate.get(Calendar.MONTH)+1)
+                                    + "-" + String.format("%02d",NowDate.get(Calendar.DATE))
+                    );
+
+            String FuturesName = Futureslink.substring(63,67);
+
             Statement statement = conn.createStatement();
             statement.executeUpdate
                     (
-                            "CREATE TABLE if not exists futures_MTX1" +
+                            "CREATE TABLE if not exists " + FuturesName +
                                     "(Date DATE not null," +
                                     "Opening_price TEXT," +
                                     "Highest_price TEXT," +
@@ -59,9 +66,9 @@ public class runfutureshistorydata extends Thread
                                     "primary key(Date));"
                     );
 
-            while (!Start.equals(Now))
+            while (!Start.equals(NextDay))
             {
-                String URL2 = Futureslink2.replace("********",Start.replaceAll("-",""));
+                String URL2 = Futureslink.replace("********",Start.replaceAll("-",""));
 
                 Document MTX1data = Jsoup.parse(new URL(URL2),5000);
                 sleep((int)(Math.random()*2000+3000));  //暫停，避免斷線
@@ -76,7 +83,7 @@ public class runfutureshistorydata extends Thread
                 {
                     case 1:
                         statement.executeUpdate
-                                ("insert ignore into futures_MTX1 values" +
+                                ("insert ignore into "+ FuturesName +" values" +
                                         "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
                                         +TD[5]+"')");
 
@@ -90,7 +97,7 @@ public class runfutureshistorydata extends Thread
                             TD[k+1] = Td;
                         }
                         statement.executeUpdate
-                                ("insert ignore into futures_MTX1 values" +
+                                ("insert ignore into "+ FuturesName +" values" +
                                         "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
                                         +TD[5]+"')");
 
@@ -98,8 +105,8 @@ public class runfutureshistorydata extends Thread
                         System.out.println(B);
                         break;
                 }
-                startDate.add(Calendar.DATE,1);
-                Start = SDF.format(startDate.getTime());
+                StartDate.add(Calendar.DATE,1);
+                Start = SDF.format(StartDate.getTime());
             }
             statement.close();
             conn.close();
