@@ -7,6 +7,7 @@ import org.jsoup.select.Elements;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -18,7 +19,14 @@ public class RunFuturesData extends Thread
     private String Futureslink;
     private Connection conn;
 
-    public void setStartDate(Calendar StartDate) { this.StartDate = StartDate; }
+    public void setTime(int Year, int Month, int Day)
+    {
+        Calendar A = Calendar.getInstance();
+        A.set(Calendar.YEAR,Year);
+        A.set(Calendar.MONTH,Month-1);
+        A.set(Calendar.DAY_OF_MONTH,Day);
+        StartDate = A;
+    }
     /*
     設定期貨資料源
     */
@@ -37,19 +45,10 @@ public class RunFuturesData extends Thread
         */
         SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
         Calendar NowDate = Calendar.getInstance();
-        NowDate.getTime();
-
         try
         {
             String Start = SDF.format(StartDate.getTime());
-
-            NowDate.add(Calendar.DATE,1);
-            String NextDay = String.valueOf
-                    (
-                            NowDate.get(Calendar.YEAR)
-                                    + "-" + String.format("%02d",NowDate.get(Calendar.MONTH)+1)
-                                    + "-" + String.format("%02d",NowDate.get(Calendar.DATE))
-                    );
+            String Now = SDF.format(NowDate.getTime());
 
             String FuturesName = Futureslink.substring(63,67);
 
@@ -65,48 +64,98 @@ public class RunFuturesData extends Thread
                                     "Number_of_transactions TEXT," +
                                     "primary key(Date));"
                     );
-
-            while (!Start.equals(NextDay))
+            /*
+            下載歷史資料
+            */
+            while (!Start.equals(Now))
             {
-                String URL2 = Futureslink.replace("********",Start.replaceAll("-",""));
+                String URL = Futureslink.replace("********",Start.replaceAll("-",""));
 
-                Document MTX1data = Jsoup.parse(new URL(URL2),5000);
-                sleep((int)(Math.random()*2000+3000));  //暫停，避免斷線
-
-                Element tr = MTX1data.select("tr").get(6);
-                Elements tds = tr.select("td");
-
-                String[] TD = new String[6];
-                TD[0] = Start;
-
-                switch (tds.size())
+                ResultSet RS= statement.executeQuery
+                        ("SELECT * FROM " + FuturesName +
+                                " where Date = '" +Start+ "'");
+                if (RS.next())
                 {
-                    case 1:
-                        statement.executeUpdate
-                                ("insert ignore into "+ FuturesName +" values" +
-                                        "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
-                                        +TD[5]+"')");
-
-                        String A = Arrays.toString(TD);
-                        System.out.println(A);
-                        break;
-                    case 5:
-                        for (int k = 0; k < tds.size(); k++)
-                        {
-                            String Td = tds.get(k).text();
-                            TD[k+1] = Td;
-                        }
-                        statement.executeUpdate
-                                ("insert ignore into "+ FuturesName +" values" +
-                                        "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
-                                        +TD[5]+"')");
-
-                        String B = Arrays.toString(TD);
-                        System.out.println(B);
-                        break;
+                    System.out.println(Start + "已有資料，略過");
                 }
+                else
+                    {
+                        Document MTX1data = Jsoup.parse(new URL(URL),10000);
+                        sleep((int)(Math.random()*2000+3000));  //暫停，避免斷線
+
+                        Element tr = MTX1data.select("tr").get(6);
+                        Elements tds = tr.select("td");
+
+                        String[] TD = new String[6];
+                        TD[0] = Start;
+
+                        switch (tds.size())
+                        {
+                            case 1:
+                                statement.executeUpdate
+                                        ("insert ignore into "+ FuturesName +" values" +
+                                                "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                                +TD[5]+"')");
+
+                                String A = Arrays.toString(TD);
+                                System.out.println(A);
+                                break;
+                            case 5:
+                                for (int k = 0; k < tds.size(); k++)
+                                {
+                                    String Td = tds.get(k).text();
+                                    TD[k+1] = Td;
+                                }
+                                statement.executeUpdate
+                                        ("insert ignore into "+ FuturesName +" values" +
+                                                "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                                +TD[5]+"')");
+
+                                String B = Arrays.toString(TD);
+                                System.out.println(B);
+                                break;
+                        }
+                    }
                 StartDate.add(Calendar.DATE,1);
                 Start = SDF.format(StartDate.getTime());
+            }
+
+            String URL2 = Futureslink.replace("********",Now.replaceAll("-",""));
+
+            Document MTX1data = Jsoup.parse(new URL(URL2),10000);
+            sleep((int)(Math.random()*2000+3000));  //暫停，避免斷線
+
+            Element tr = MTX1data.select("tr").get(6);
+            Elements tds = tr.select("td");
+
+            String[] TD = new String[6];
+            TD[0] = Start;
+
+            switch (tds.size())
+            {
+                case 1:
+                    statement.executeUpdate
+                            ("insert ignore into "+ FuturesName +" values" +
+                                    "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                    +TD[5]+"')");
+
+                    String A = Arrays.toString(TD);
+                    System.out.println(A);
+                    break;
+                case 5:
+                    for (int k = 0; k < tds.size(); k++)
+                    {
+                        String Td = tds.get(k).text();
+                        TD[k+1] = Td;
+                    }
+                    statement.executeUpdate
+                            ("insert ignore into "+ FuturesName +" values" +
+                                    "('"+TD[0]+"','" +TD[1]+"','" +TD[2]+"','" +TD[3]+"','" +TD[4]+"','"
+                                    +TD[5]+"')");
+
+                    String B = Arrays.toString(TD);
+                    System.out.println(B);
+                    break;
             }
             statement.close();
             conn.close();
