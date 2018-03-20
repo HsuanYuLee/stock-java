@@ -1,4 +1,4 @@
-group 'org.test'
+group 'org.config'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
