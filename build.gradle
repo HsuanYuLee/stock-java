@@ -1,22 +1,19 @@
-group 'org.config'
+group 'com.hsuanyulee'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
-repositories
-        {
-            mavenCentral()
-        }
+repositories {
+    mavenCentral()
+}
 
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.8.v20171121'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.8.v20171121'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.9.2'
 
-dependencies
-        {
-            testCompile group: 'junit', name: 'junit', version: '4.12'
-            compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.8.v20171121'
-            compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.8.v20171121'
-            compile group: 'org.jsoup', name: 'jsoup', version: '1.11.2'
-            compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
-
-        }
+}
