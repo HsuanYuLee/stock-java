@@ -8,34 +8,52 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 
-public class getFuturesHistory extends Thread
+public class GetFuturesData extends Thread
 {
     private String FuturesLink = ConfigManager.instance().FuturesLink;
-    private String Year = ConfigManager.instance().Futures_End_Year;
-    private String Month = ConfigManager.instance().Futures_End_Month;
-    private String Day = ConfigManager.instance().Futures_End_Day;
-
+    private String FinalDate = ConfigManager.instance().Futures_Data_Final_Date;
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+    private futuresDaoImpl fDao = new futuresDaoImpl();
 
     @Override
     public void run()
     {
         super.run();
 
-        Calendar Date = Calendar.getInstance();
-        String date = sdf.format(Date.getTime());
+        ArrayList<futures> fl = fDao.findAll();
+        futures EndData = fl.get(0);
+        Date EndDate = EndData.getDate();
+
+        Calendar DateStart = Calendar.getInstance();
+        String dateStart = sdf.format(DateStart.getTime());
+        Date Now = Date.valueOf(dateStart);
+
+        while (!Now.equals(EndDate))
+        {
+            DateStart.add(Calendar.DATE,-1);
+            dateStart = sdf.format(DateStart.getTime());
+            Now = Date.valueOf(dateStart);
+        }
+        System.out.println(dateStart+"日前的資料已有，從"+dateStart+"日繼續下載");
+
+
         futuresDaoImpl fDao = new futuresDaoImpl();
         futures fs = new futures();
+        String Final = FinalDate.replaceAll("'","");
 
-        while (!date.equals(Year +"-"+ Month +"-"+ Day))
+
+        while (!dateStart.equals(Final))
         {
             try
             {
-                String date2 = date.replaceAll("-","");
+                String date2 = dateStart.replaceAll("-","");
                 String Link = FuturesLink.replace("********",date2);
 
                 Document data = Jsoup.connect(Link).timeout(30000).validateTLSCertificates(false).get();
@@ -44,7 +62,7 @@ public class getFuturesHistory extends Thread
                 Element tr = data.select("tr").get(6);
                 Elements tds = tr.select("td");
                 String[] fdata = new String[6];
-                fdata[0] = date;
+                fdata[0] = dateStart;
 
                 switch (tds.size())
                 {
@@ -70,10 +88,10 @@ public class getFuturesHistory extends Thread
             {
                 e.printStackTrace();
             }
-            Date.add(Calendar.DATE,-1);
-            date = sdf.format(Date.getTime());
-        }
 
+            DateStart.add(Calendar.DATE,-1);
+            dateStart = sdf.format(DateStart.getTime());
+        }
 
     }
 }

@@ -1,5 +1,6 @@
 package dao;
 
+import Manager.ConfigManager;
 import db.MySQLconnect;
 import domain.futures;
 
@@ -7,7 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 public class futuresDaoImpl implements futuresDao
@@ -15,10 +16,6 @@ public class futuresDaoImpl implements futuresDao
     private Connection conn;
     private PreparedStatement ps;
     private ResultSet rs;
-
-
-    HashMap<String,futures> flist= new HashMap<>();
-    //ArrayList<futures> flist = new ArrayList<>();
 
     @Override
     public void add(futures f)
@@ -58,18 +55,23 @@ public class futuresDaoImpl implements futuresDao
     }
 
     @Override
-    public HashMap<String, futures> findByDate(String Date)
+    public ArrayList<futures> findByDate(String StartDate, String EndDate)
     {
+        ArrayList<futures> fl= new ArrayList<>();
+
         try
         {
             conn = MySQLconnect.instance().getFuturesConnection();
-            String SQL = "SELECT * from mtx1 where date >";
-            ps = conn.prepareStatement(SQL + Date);
+
+            String SQL1 = "SELECT * from mtx1 where date <=";
+            String SQL2 = "&& date >=";
+            ps = conn.prepareStatement(SQL1 + EndDate + SQL2 + StartDate);
             rs = ps.executeQuery();
-            int i = 0;
+
             while (rs.next())
             {
                 futures fdata = new futures();
+
                 fdata.setDate(String.valueOf(rs.getDate(1)));
                 fdata.setOpening_price(rs.getString(2));
                 fdata.setHighest_price(rs.getString(3));
@@ -77,8 +79,7 @@ public class futuresDaoImpl implements futuresDao
                 fdata.setClosing_price(rs.getString(5));
                 fdata.setNumber_of_transactions(rs.getString(6));
 
-                flist.put(""+i+"",fdata);
-                i++;
+                fl.add(fdata);
             }
         }
         catch(Exception e)
@@ -90,12 +91,47 @@ public class futuresDaoImpl implements futuresDao
         {
             MySQLconnect.instance().close(rs,ps,conn);
         }
-        return flist;
+        return fl;
     }
 
     @Override
-    public List<futures> findAll() throws SQLException {
-        return null;
+    public ArrayList<futures> findAll()
+    {
+        ArrayList<futures> fl= new ArrayList<>();
+
+        try
+        {
+            conn = MySQLconnect.instance().getFuturesConnection();
+
+            String SQL1 = "SELECT * from mtx1 where date >";
+            String FinalDate = ConfigManager.instance().Futures_Data_Final_Date;
+            ps = conn.prepareStatement(SQL1 + FinalDate);
+            rs = ps.executeQuery();
+
+            while (rs.next())
+            {
+                futures fdata = new futures();
+
+                fdata.setDate(String.valueOf(rs.getDate(1)));
+                fdata.setOpening_price(rs.getString(2));
+                fdata.setHighest_price(rs.getString(3));
+                fdata.setLowest_price(rs.getString(4));
+                fdata.setClosing_price(rs.getString(5));
+                fdata.setNumber_of_transactions(rs.getString(6));
+
+                fl.add(fdata);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("資料查找失敗");
+        }
+        finally
+        {
+            MySQLconnect.instance().close(rs,ps,conn);
+        }
+        return fl;
     }
 
 }

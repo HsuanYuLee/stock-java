@@ -2,9 +2,9 @@ jdbc.stockurl=jdbc:mysql://127.0.0.1:3306/stock
 jdbc.futuresurl=jdbc:mysql://127.0.0.1:3306/futures
 jdbc.username=root
 jdbc.password=12345
-jdbc.driver=com.mysql.jdbc.Driver
 
 FuturesLink = https://www.cnyes.com/futures/History.aspx?mydate=********&code=MTX1
-Futures_End_Year = 2000
-Futures_End_Month = 04
-Futures_End_Day = 09
+Futures_Data_Final_Date = '2000-04-09'
+
+Futures_Search_Start_Date = '2018-03-20'
+Futures_Search_End_Date = '2018-03-29'

@@ -6,8 +6,9 @@ import java.util.Properties;
 public class ConfigManager
 {
     private static ConfigManager config;
-    public String dbstockurl,dbfuturesurl,dbusername,dbpassword,dbdriver;
-    public String FuturesLink,Futures_End_Year,Futures_End_Month,Futures_End_Day;
+    public String dbstockurl,dbfuturesurl,dbusername,dbpassword;
+    public String FuturesLink,Futures_Data_Final_Date;
+    public String Futures_Search_Start_Date,Futures_Search_End_Date;
 
 
     public static ConfigManager instance()
@@ -32,12 +33,12 @@ public class ConfigManager
             dbfuturesurl = properties.getProperty("jdbc.futuresurl");
             dbusername = properties.getProperty("jdbc.username");
             dbpassword = properties.getProperty("jdbc.password");
-            dbdriver = properties.getProperty("jdbc.driver");
 
             FuturesLink = properties.getProperty("FuturesLink");
-            Futures_End_Year = properties.getProperty("Futures_End_Year");
-            Futures_End_Month = properties.getProperty("Futures_End_Month");
-            Futures_End_Day = properties.getProperty("Futures_End_Day");
+            Futures_Data_Final_Date = properties.getProperty("Futures_Data_Final_Date");
+
+            Futures_Search_Start_Date = properties.getProperty("Futures_Search_Start_Date");
+            Futures_Search_End_Date = properties.getProperty("Futures_Search_End_Date");
         }
         catch (Exception e)
         {

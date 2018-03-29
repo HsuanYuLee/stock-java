@@ -1,6 +1,7 @@
-import Service.getFuturesHistory;
+import controller.GetFuturesAllData;
 import controller.HelloServlet;
-import controller.SearchFuturesData;
+import controller.ShowFuturesData;
+import controller.ShowFuturesDataAll;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 
@@ -10,9 +11,6 @@ public class test
     {
         try
         {
-            getFuturesHistory getFuturesHistory = new getFuturesHistory();
-            getFuturesHistory.start();
-
 
             //建立伺服器
             Server server = new Server(8080);
@@ -22,8 +20,11 @@ public class test
             server.setHandler(handler);
 
             //將Servlet裝進Handler內
-            handler.addServletWithMapping(SearchFuturesData.class, "/findFutureData");
             handler.addServletWithMapping(HelloServlet.class,"/hello");
+            handler.addServletWithMapping(ShowFuturesData.class, "/ShowFuturesData");
+            handler.addServletWithMapping(ShowFuturesDataAll.class, "/ShowFuturesDataAll");
+            handler.addServletWithMapping(GetFuturesAllData.class, "/GetFuturesAllData");
+
             //啟動伺服器
             server.start();
             //等待連線
