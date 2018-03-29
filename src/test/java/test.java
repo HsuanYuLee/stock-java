@@ -1,37 +1,24 @@
-import controller.GetFuturesAllData;
+import Manager.ConfigManager;
+import Service.GetFuturesData;
+import Service.GetFuturesDataToday;
+import Service.GetStocKData;
 import controller.HelloServlet;
 import controller.ShowFuturesData;
 import controller.ShowFuturesDataAll;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
+
 public class test
 {
     public static void main(String[] args)
     {
-        try
-        {
+        GetStocKData getStocKData = new GetStocKData();
 
-            //建立伺服器
-            Server server = new Server(8080);
-            //建立Server內可調用的handler
-            //並將handler裝進server內
-            ServletHandler handler = new ServletHandler();
-            server.setHandler(handler);
-
-            //將Servlet裝進Handler內
-            handler.addServletWithMapping(HelloServlet.class,"/hello");
-            handler.addServletWithMapping(ShowFuturesData.class, "/ShowFuturesData");
-            handler.addServletWithMapping(ShowFuturesDataAll.class, "/ShowFuturesDataAll");
-            handler.addServletWithMapping(GetFuturesAllData.class, "/GetFuturesAllData");
-
-            //啟動伺服器
-            server.start();
-            //等待連線
-            server.join();
-
-
-        }catch (Exception e){ e.printStackTrace(); }
+        getStocKData.start();
 
 
 

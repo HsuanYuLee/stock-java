@@ -9,7 +9,7 @@ public class MySQLconnect
 {
     private static MySQLconnect connect;
 
-    public String stockURL,futuresURL,USERNAME,PASSWORD;
+    private String stockURL,futuresURL,USERNAME,PASSWORD;
 
     public static MySQLconnect instance()
     {

@@ -7,9 +7,7 @@ import domain.futures;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class futuresDaoImpl implements futuresDao
 {
@@ -23,7 +21,7 @@ public class futuresDaoImpl implements futuresDao
         try
         {
             conn = MySQLconnect.instance().getFuturesConnection();
-            String SQL = "INSERT ignore into mtx1 values(?,?,?,?,?,?)";
+            String SQL = "INSERT ignore into futures.mtx1 values(?,?,?,?,?,?)";
             ps = conn.prepareStatement(SQL);
             ps.setDate(1,f.getDate());
             ps.setString(2,f.getOpening_price());
@@ -45,14 +43,10 @@ public class futuresDaoImpl implements futuresDao
     }
 
     @Override
-    public void delete(String Date) throws SQLException {
-
-    }
+    public void delete(String Date){ }
 
     @Override
-    public void update(futures f) throws SQLException {
-
-    }
+    public void update(futures f){ }
 
     @Override
     public ArrayList<futures> findByDate(String StartDate, String EndDate)

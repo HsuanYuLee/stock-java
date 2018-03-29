@@ -18,14 +18,6 @@ public class ShowFuturesData extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     {
-        futures title = new futures();
-        title.setDate("Date");
-        title.setOpening_price("Opening_price");
-        title.setHighest_price("Highest_price");
-        title.setLowest_price("Lowest_price");
-        title.setClosing_price("Closing_price");
-        title.setNumber_of_transactions("Number_of_transactions");
-
         resp.setContentType("text/html");
         resp.setStatus(HttpServletResponse.SC_OK);
 

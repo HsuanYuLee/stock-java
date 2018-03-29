@@ -1,10 +1,17 @@
+Timer_Start_time = 14:00:00
+Timer_Period_time = 86400000
+
 jdbc.stockurl=jdbc:mysql://127.0.0.1:3306/stock
 jdbc.futuresurl=jdbc:mysql://127.0.0.1:3306/futures
 jdbc.username=root
 jdbc.password=12345
 
 FuturesLink = https://www.cnyes.com/futures/History.aspx?mydate=********&code=MTX1
-Futures_Data_Final_Date = '2000-04-09'
-
+Futures_Data_Final_Date = '2000-01-01'
 Futures_Search_Start_Date = '2018-03-20'
 Futures_Search_End_Date = '2018-03-29'
+
+StockLink = http://www.twse.com.tw/exchangeReport/STOCK_DAY?response=html&date=********&stockNo=2330
+Stock_Data_Final_Date = '2000-01-01'
+Stock_Search_Start_Date = '2018-03-20'
+Stock_Search_End_Date = '2018-03-29'

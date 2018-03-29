@@ -44,10 +44,8 @@ public class GetFuturesData extends Thread
         System.out.println(dateStart+"日前的資料已有，從"+dateStart+"日繼續下載");
 
 
-        futuresDaoImpl fDao = new futuresDaoImpl();
         futures fs = new futures();
         String Final = FinalDate.replaceAll("'","");
-
 
         while (!dateStart.equals(Final))
         {
@@ -92,6 +90,5 @@ public class GetFuturesData extends Thread
             DateStart.add(Calendar.DATE,-1);
             dateStart = sdf.format(DateStart.getTime());
         }
-
     }
 }
